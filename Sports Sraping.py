@@ -511,7 +511,7 @@ def Run():
         print(playerDict)
     df = pd.DataFrame(playerDict)
     df.columns = pd.MultiIndex.from_tuples([tuple(c.split("☳")) for c in df.columns])
-    with pd.ExcelWriter('{0} to {1}.xlsx'.format(StartSeason,EndSeason)) as writer:
+    with pd.ExcelWriter('Output\{0} to {1}.xlsx'.format(StartSeason,EndSeason)) as writer:
         df.to_excel(writer, sheet_name = '{0} to {1}'.format(StartSeason,EndSeason))
         workbook = writer.book
         worksheet = writer.sheets['{0} to {1}'.format(StartSeason,EndSeason)]
@@ -548,7 +548,7 @@ def Test():
              finalDict.setdefault(stats,[]).append(playersArr[player].totals[stats][0])
     df = pd.DataFrame(finalDict)
     df.columns = pd.MultiIndex.from_tuples([tuple(c.split("☳")) for c in df.columns])
-    with pd.ExcelWriter('{0} to {1}.xlsx'.format(StartSeason,EndSeason)) as writer:
+    with pd.ExcelWriter('Output\{0} to {1}.xlsx'.format(StartSeason,EndSeason)) as writer:
         df.to_excel(writer, sheet_name = '{0} to {1}'.format(StartSeason,EndSeason))
         workbook = writer.book
         worksheet = writer.sheets['{0} to {1}'.format(StartSeason,EndSeason)]
