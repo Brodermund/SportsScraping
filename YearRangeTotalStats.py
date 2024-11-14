@@ -1,13 +1,17 @@
 import sys
 import time
 import bs4
+import os
 from bs4 import BeautifulSoup as soup
-import requests, pandas as pd
+import requests
+import pandas as pd
+from pathlib import Path
 
 
 
 
-StartSeason = 2018
+
+StartSeason = 2010
 EndSeason = 2024
 
 class General:
@@ -147,7 +151,7 @@ def GetPlayer(row):
             player = Player(playerName,playerID,position,dict())
             playersArr.setdefault(playerID,player)
             return player
-            
+
 def _sum(arr):
     sum = 0
     for i in arr:
@@ -327,7 +331,6 @@ def SeasonStats(Season):
                     recDict[keys].append("0") 
                 receiving = Receiving(recDict)
                 playersArr[player].stats[str(Season)].Receiving = receiving
-
 def GetPassing(year):
     print(" --{0} Passing".format(year))
     PassingUrl = "https://www.pro-football-reference.com/years/{0}/passing.htm#passing::pass_att".format(year)
@@ -392,7 +395,8 @@ def Run(StartSeason,EndSeason):
              finalDict.setdefault(stats,[]).append(playersArr[player].totals[stats][0])
     df = pd.DataFrame(finalDict)
     df.columns = pd.MultiIndex.from_tuples([tuple(c.split("☳")) for c in df.columns])
-    with pd.ExcelWriter('{0} to {1}.xlsx'.format(StartSeason,EndSeason)) as writer:
+    path = Path("/Users/avatara/Desktop/SportsScraping/Output").joinpath('{0} to {1}.xlsx'.format(StartSeason,EndSeason))
+    with pd.ExcelWriter(path) as writer:
         df.to_excel(writer, sheet_name = '{0} to {1}'.format(StartSeason,EndSeason))
         workbook = writer.book
         worksheet = writer.sheets['{0} to {1}'.format(StartSeason,EndSeason)]
@@ -408,7 +412,9 @@ def Test():
     ## Test code Here
     print("Test")
 
-if __name__ == "__main__":
-  num1 = sys.argv[1]
-  num2 = sys.argv[2]
-  Run(int(num1),int(num2))
+Run(StartSeason,EndSeason)
+
+# if __name__ == "__main__":
+#   num1 = sys.argv[1]
+#   num2 = sys.argv[2]
+#   Run(int(num1),int(num2))
