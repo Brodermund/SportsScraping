@@ -1,0 +1,278 @@
+{
+    "0": {
+      "stat": "index",
+      "format": "whole",
+      "sizePx": 30,
+      "index": 0
+    },
+    "1": {
+      "stat": "Player",
+      "format": "whole",
+      "sizePx": 175,
+      "index": 1
+    },
+    "2": {
+      "stat": "Pos",
+      "format": "whole",
+      "sizePx": 50,
+      "index": 2
+    },
+    "3": {
+      "stat": "G",
+      "format": "whole",
+      "sizePx": 40,
+      "index": 3
+    },
+    "4": {
+      "stat": "GS",
+      "format": "wholeBrd",
+      "sizePx": 40,
+      "index": 4
+    },
+    "5": {
+      "stat": "Cmp",
+      "format": "whole",
+      "sizePx": 55,
+      "index": 5
+    },
+    "6": {
+      "stat": "Att",
+      "format": "whole",
+      "sizePx": 55,
+      "index": 6
+    },
+    "7": {
+      "stat": "Record",
+      "format": "whole",
+      "sizePx": 65,
+      "index": 7
+    },
+    "8": {
+      "stat": "Cmp%",
+      "format": "percent",
+      "sizePx": 65,
+      "index": 8
+    },
+    "9": {
+      "stat": "Yds",
+      "format": "whole",
+      "sizePx": 50,
+      "index": 9
+    },
+    "10": {
+      "stat": "TD",
+      "format": "whole",
+      "sizePx": 45,
+      "index": 10
+    },
+    "11": {
+      "stat": "TD%",
+      "format": "percent",
+      "sizePx": 55,
+      "index": 11
+    },
+    "12": {
+      "stat": "Int",
+      "format": "whole",
+      "sizePx": 45,
+      "index": 12
+    },
+    "13": {
+      "stat": "Int%",
+      "format": "percent",
+      "sizePx": 55,
+      "index": 13
+    },
+    "14": {
+      "stat": "1D",
+      "format": "whole",
+      "sizePx": 45,
+      "index": 14
+    },
+    "15": {
+      "stat": "Long",
+      "format": "whole",
+      "sizePx": 55,
+      "index": 15
+    },
+    "16": {
+      "stat": "Y/A",
+      "format": "decimal",
+      "sizePx": 50,
+      "index": 16
+    },
+    "17": {
+      "stat": "AY/A",
+      "format": "decimal",
+      "sizePx": 55,
+      "index": 17
+    },
+    "18": {
+      "stat": "Y/Cmp",
+      "format": "decimal",
+      "sizePx": 70,
+      "index": 18
+    },
+    "19": {
+      "stat": "Y/G",
+      "format": "decimal",
+      "sizePx": 50,
+      "index": 19
+    },
+    "20": {
+      "stat": "Rating",
+      "format": "decimal",
+      "sizePx": 70,
+      "index": 20
+    },
+    "21": {
+      "stat": "Sk",
+      "format": "whole",
+      "sizePx": 40,
+      "index": 21
+    },
+    "22": {
+      "stat": "Sk Yds",
+      "format": "whole",
+      "sizePx": 65,
+      "index": 22
+    },
+    "23": {
+      "stat": "Sk%",
+      "format": "percent",
+      "sizePx": 50,
+      "index": 23
+    },
+    "24": {
+      "stat": "NY/A",
+      "format": "decimal",
+      "sizePx": 60,
+      "index": 24
+    },
+    "25": {
+      "stat": "ANY/A",
+      "format": "decimalBrd",
+      "sizePx": 70,
+      "index": 25
+    },
+    "26": {
+      "stat": "Att",
+      "format": "whole",
+      "sizePx": 55,
+      "index": 26
+    },
+    "27": {
+      "stat": "Yds",
+      "format": "whole",
+      "sizePx": 50,
+      "index": 27
+    },
+    "28": {
+      "stat": "TD",
+      "format": "whole",
+      "sizePx": 45,
+      "index": 28
+    },
+    "29": {
+      "stat": "1D",
+      "format": "whole",
+      "sizePx": 45,
+      "index": 29
+    },
+    "30": {
+      "stat": "Long",
+      "format": "whole",
+      "sizePx": 55,
+      "index": 30
+    },
+    "31": {
+      "stat": "Y/A",
+      "format": "decimal",
+      "sizePx": 50,
+      "index": 31
+    },
+    "32": {
+      "stat": "Y/G",
+      "format": "decimal",
+      "sizePx": 50,
+      "index": 32
+    },
+    "33": {
+      "stat": "Att/G",
+      "format": "decimalBrd",
+      "sizePx": 60,
+      "index": 33
+    },
+    "34": {
+      "stat": "Fmb",
+      "format": "wholeBrd",
+      "sizePx": 55,
+      "index": 34
+    },
+    "35": {
+      "stat": "Tgt",
+      "format": "whole",
+      "sizePx": 65,
+      "index": 35
+    },
+    "36": {
+      "stat": "Rec",
+      "format": "whole",
+      "sizePx": 50,
+      "index": 36
+    },
+    "37": {
+      "stat": "Yds",
+      "format": "whole",
+      "sizePx": 50,
+      "index": 37
+    },
+    "38": {
+      "stat": "Y/R",
+      "format": "decimal",
+      "sizePx": 50,
+      "index": 38
+    },
+    "39": {
+      "stat": "TD",
+      "format": "whole",
+      "sizePx": 45,
+      "index": 39
+    },
+    "40": {
+      "stat": "1D",
+      "format": "whole",
+      "sizePx": 45,
+      "index": 40
+    },
+    "41": {
+      "stat": "Long",
+      "format": "whole",
+      "sizePx": 55,
+      "index": 41
+    },
+    "42": {
+      "stat": "R/G",
+      "format": "decimal",
+      "sizePx": 50,
+      "index": 42
+    },
+    "43": {
+      "stat": "Y/G",
+      "format": "decimal",
+      "sizePx": 50,
+      "index": 43
+    },
+    "44": {
+      "stat": "Ctch%",
+      "format": "percent",
+      "sizePx": 65,
+      "index": 44
+    },
+    "45": {
+      "stat": "Y/T",
+      "format": "decimal",
+      "sizePx": 50,
+      "index": 45
+    }
+  }
