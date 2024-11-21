@@ -3,6 +3,7 @@
 import time
 import json
 from pathlib import Path
+from operator import itemgetter
 from ratelimit import limits, sleep_and_retry
 from bs4 import BeautifulSoup as soup
 import requests
@@ -11,8 +12,13 @@ MIN_PYTHON = (3, 10)
 # if sys.version_info < MIN_PYTHON:
 #     sys.exit("Python %s.%s or later is required.\n" % MIN_PYTHON)
 
-START_SEASON = 2018
-END_SEASON = 2024
+
+START_SEASON = 2012
+END_SEASON = 2020
+POS_FILTER = ("WR","FS","RB","P","TE","K","FB","DB","LT","T","LDT","SS","LDE","DE","RDE","LB","C","FS/SS","NT","LG","RT","RG","CB","RLB","G","RT/LT","RCB","S","OL","DT","DL")
+SORT_STAT = "pass_td"
+
+
 CALLS = 20
 RATE_LIMIT = 60
 players_array = {}
@@ -120,7 +126,7 @@ class Player:
                 total_dict.setdefault(item,[]).append(receiving_stats[item][0])
         for key in total_dict:
             cal = stat_calculations(total_dict,key)
-            fin_dict.setdefault(stats_ref[key]["title"],[]).append(cal)
+            fin_dict.setdefault(stats_ref[key]["title"],cal)
         return fin_dict
     def get_yearly(self,year):
         """Function that returns the total sum stats for every season"""
@@ -141,7 +147,7 @@ class Player:
                 year_dict.setdefault(item,[]).append(receiving_stats[item][0])
             for key in year_dict:
                 cal = stat_calculations(year_dict,key)
-                fin_dict.setdefault(stats_ref[key]["title"],[]).append(cal)
+                fin_dict.setdefault(stats_ref[key]["title"],cal)
             return fin_dict
         return None
 def get_player(row):
@@ -157,12 +163,15 @@ def get_player(row):
             position = cell.text
         else:
             continue
+
+
     if player_id in players_array:
         player = players_array[player_id]
         # print("{0} already exists in Players Array".format(playerName))
         return player
     player = Player(player_name,player_id,position,{})
-    players_array.setdefault(player_id,player)
+    if player.pos in POS_FILTER or POS_FILTER is None:
+        players_array.setdefault(player_id,player)
     return player
 def _sum(arr):
     sum_var = 0
@@ -323,6 +332,8 @@ def get_stats(year):
             dictionary = {}
             get_headers(table,dictionary)
             fetched_player = get_player(row)
+            if fetched_player.pos not in POS_FILTER and POS_FILTER is not None:
+                continue
             new_stat = get_table_row(row,dictionary)
             if str(year) in fetched_player.stats:
                 fetched_season = fetched_player.stats[str(year)]
@@ -350,15 +361,33 @@ def leader_stats(start_season,end_season):
     x = range(start_season,end_season + 1)
     final_dictionary = {}
     season_dictionary = {}
+    s_dictionary = {}
+    final_list = []
     for season in x:
         print(f"Starting Season {season}")
         get_season_stats(season)
         if end_season - start_season >= 8 and season != end_season:
             time.sleep(8)
     for player in players_array.values():
-        get_totals(player,final_dictionary)
-        for key in player.stats:
-            get_season_dictionary(player,key,season_dictionary)
+        list_player = get_totals(player,final_dictionary)
+        final_list.append(list_player)
+
+        for key in x:
+            s_dictionary.setdefault(str(key),[])
+            season_list_item = get_season_dictionary(player,str(key))
+            if season_list_item is None:
+                continue
+            s_dictionary.setdefault(str(key),[]).append(season_list_item)
+    for seasons,values in s_dictionary.items():
+        season_dictionary.setdefault(seasons,{})
+        sorted_list = sorted(values, key=itemgetter(stats_ref[SORT_STAT]["title"]), reverse=True)
+        for player in sorted_list:
+            for key,value in player.items():
+                season_dictionary[seasons].setdefault(key,[]).append(value)
+    new_list = sorted(final_list, key=itemgetter(stats_ref[SORT_STAT]["title"]), reverse=True)
+    for player_1 in new_list:
+        for key,value in player_1.items():
+            final_dictionary.setdefault(key,[]).append(value)
     df = pd.DataFrame(final_dictionary)
     df.columns = pd.MultiIndex.from_tuples([tuple(c.split("☳")) for c in df.columns])
     dataframes.setdefault("Totals",df)
@@ -389,7 +418,14 @@ def format_excel_column(book,sheet,column):
 def save_to_excel(start_season,end_season,dataframes):
     """Takes a dictionary of dataframes and saves them to a single excel sheet"""
     output_path = Path("/Users/avatara/Desktop/SportsScraping/Output")
-    file_path = output_path.joinpath(f'{start_season} to {end_season}.xlsx')
+    if POS_FILTER is None:
+        file_path = output_path.joinpath(f'{start_season} to {end_season}.xlsx')
+    else:
+        if len(POS_FILTER) > 3:
+            file_path = output_path.joinpath(f'multiple |{start_season} to {end_season}.xlsx')
+        else:    
+            pos_str = " ".join(POS_FILTER)
+            file_path = output_path.joinpath(f'{pos_str} |{start_season} to {end_season}.xlsx')
     with pd.ExcelWriter(file_path) as writer:
         workbook = writer.book
         column_ref = load_json("Utils/ColumnRef.json")
@@ -401,23 +437,30 @@ def save_to_excel(start_season,end_season,dataframes):
                 format_excel_column(workbook,worksheet,item)
 def get_totals(player,dictionary):
     """gets totals for the player"""
+    player_dict = {}
     # print(f"Getting Totals for {player.name}")
     player.totals = player.get_totals()
-    dictionary.setdefault(stats_ref["Player"]["title"],[]).append( player.name)
-    dictionary.setdefault(stats_ref["pos"]["title"],[]).append( player.pos)
+    # dictionary.setdefault(stats_ref["Player"]["title"],[]).append( player.name)
+    # dictionary.setdefault(stats_ref["pos"]["title"],[]).append( player.pos)
+    player_dict.setdefault(stats_ref["Player"]["title"],player.name)
+    player_dict.setdefault(stats_ref["pos"]["title"],player.pos)
     for stats in player.totals:
-        dictionary.setdefault(stats,[]).append(player.totals[stats][0])
-def get_season_dictionary(player,year,dictionary):
+        player_dict.setdefault(stats,player.totals[stats])
+        # dictionary.setdefault(stats,[]).append(player.totals[stats])
+    return player_dict    
+def get_season_dictionary(player,year):
     """gets the season dictionary"""
+
     if player.get_yearly(year) is None:
-        pass
+        return None
     else:
-        dictionary.setdefault(str(year),dict())
+        player_dict = {}
         yearly = player.get_yearly(year)
-        dictionary[str(year)].setdefault(stats_ref["Player"]["title"],[]).append( player.name)
-        dictionary[str(year)].setdefault(stats_ref["pos"]["title"],[]).append( player.pos)
+        player_dict.setdefault(stats_ref["Player"]["title"],player.name)
+        player_dict.setdefault(stats_ref["pos"]["title"],player.pos)
         for stats in yearly:
-            dictionary[str(year)].setdefault(stats,[]).append(yearly[stats][0])
+            player_dict.setdefault(stats,yearly[stats])
+        return player_dict
 def run_program(start_season,end_season):
     """Run the Program"""
     dataframes = leader_stats(start_season,end_season)
