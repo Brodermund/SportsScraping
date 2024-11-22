@@ -25,7 +25,7 @@
     },
     "4": {
       "stat": "GS",
-      "format": "wholeBrd",
+      "format": "whole_border",
       "sizePx": 40,
       "index": 4
     },
@@ -92,25 +92,25 @@
     "15": {
       "stat": "Long",
       "format": "whole",
-      "sizePx": 55,
+      "sizePx": 40,
       "index": 15
     },
     "16": {
       "stat": "Y/A",
       "format": "decimal",
-      "sizePx": 50,
+      "sizePx": 40,
       "index": 16
     },
     "17": {
       "stat": "AY/A",
       "format": "decimal",
-      "sizePx": 55,
+      "sizePx": 45,
       "index": 17
     },
     "18": {
       "stat": "Y/Cmp",
       "format": "decimal",
-      "sizePx": 70,
+      "sizePx": 50,
       "index": 18
     },
     "19": {
@@ -122,19 +122,19 @@
     "20": {
       "stat": "Rating",
       "format": "decimal",
-      "sizePx": 70,
+      "sizePx": 50,
       "index": 20
     },
     "21": {
       "stat": "Sk",
       "format": "whole",
-      "sizePx": 40,
+      "sizePx": 35,
       "index": 21
     },
     "22": {
       "stat": "Sk Yds",
       "format": "whole",
-      "sizePx": 65,
+      "sizePx": 45,
       "index": 22
     },
     "23": {
@@ -146,13 +146,13 @@
     "24": {
       "stat": "NY/A",
       "format": "decimal",
-      "sizePx": 60,
+      "sizePx": 40,
       "index": 24
     },
     "25": {
       "stat": "ANY/A",
-      "format": "decimalBrd",
-      "sizePx": 70,
+      "format": "decimal_border",
+      "sizePx": 55,
       "index": 25
     },
     "26": {
@@ -199,13 +199,13 @@
     },
     "33": {
       "stat": "Att/G",
-      "format": "decimalBrd",
+      "format": "decimal_border",
       "sizePx": 60,
       "index": 33
     },
     "34": {
       "stat": "Fmb",
-      "format": "wholeBrd",
+      "format": "whole_border",
       "sizePx": 55,
       "index": 34
     },
@@ -248,7 +248,7 @@
     "41": {
       "stat": "Long",
       "format": "whole",
-      "sizePx": 55,
+      "sizePx": 40,
       "index": 41
     },
     "42": {
