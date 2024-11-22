@@ -1,10 +1,12 @@
 """Module providing a function printing python version."""
 # import sys
+import os
 import time
 import json
 from pathlib import Path
 from operator import itemgetter
-from ratelimit import limits, sleep_and_retry
+from datetime import datetime
+# from ratelimit import limits, sleep_and_retry
 from bs4 import BeautifulSoup as soup
 import requests
 import pandas as pd
@@ -13,21 +15,27 @@ MIN_PYTHON = (3, 10)
 #     sys.exit("Python %s.%s or later is required.\n" % MIN_PYTHON)
 
 
-START_SEASON = 2012
-END_SEASON = 2020
-POS_FILTER = ("WR","FS","RB","P","TE","K","FB","DB","LT","T","LDT","SS","LDE","DE","RDE","LB","C","FS/SS","NT","LG","RT","RG","CB","RLB","G","RT/LT","RCB","S","OL","DT","DL")
-SORT_STAT = "pass_td"
+
+CURRENT_SEASON = 2024
+START_SEASON = 1966
+END_SEASON = 2024
+POS_FILTER = {}
+SORT_STAT = "pass_att"
+
+CALL_LIMIT = 20
+CALL_PERIOD = 60
 
 
-CALLS = 20
-RATE_LIMIT = 60
 players_array = {}
 
-@sleep_and_retry
-@limits(calls=CALLS, period=RATE_LIMIT)
-def check_limit():
-    """Empty function just to check for calls to API"""
-    return
+# @sleep_and_retry
+# @limits(calls=20, period=60)
+def html_request(url):
+    """Takes URL input and returns the site data in text format"""
+    sleep_time = CALL_PERIOD/CALL_LIMIT
+    time.sleep(sleep_time)
+    data = requests.get(url,timeout=10).text
+    return data
 def load_json(file_path):
     """Function that loads a JSON file"""
     with open(file_path,encoding='utf-8') as file:
@@ -42,54 +50,54 @@ class General:
         self.games_started = dictionary["games_started"]
 class Rushing:
     """Class Representing a Players Rushing Stats for a Statstical Season"""
-    def __init__(self,dictionary):
-        self.rush_att = dictionary["rush_att"]
-        self.rush_yds = dictionary["rush_yds"]
-        self.rush_td = dictionary["rush_td"]
-        self.rush_first_down = dictionary["rush_first_down"]
-        self.rush_long = dictionary["rush_long"]
-        self.rush_yds_per_att = dictionary["rush_yds_per_att"]
-        self.rush_yds_per_g = dictionary["rush_yds_per_g"]
-        self.rush_att_per_g = dictionary["rush_att_per_g"]
-        self.fumbles = dictionary["fumbles"]
+    def __init__(self,dic):
+        self.rush_att = dic["rush_att"] if "rush_att"in dic else [0]
+        self.rush_yds = dic["rush_yds"] if "rush_yds"in dic else [0]
+        self.rush_td = dic["rush_td"] if "rush_td"in dic else [0]
+        self.rush_first_down = dic["rush_first_down"] if "rush_first_down"in dic else [0]
+        self.rush_long = dic["rush_long"] if "rush_long"in dic else [0]
+        self.rush_yds_per_att = dic["rush_yds_per_att"] if "rush_yds_per_att"in dic else [0]
+        self.rush_yds_per_g = dic["rush_yds_per_g"] if "rush_yds_per_g"in dic else [0]
+        self.rush_att_per_g = dic["rush_att_per_g"] if "rush_att_per_g"in dic else [0]
+        self.fumbles = dic["fumbles"] if "fumbles"in dic else [0]
 class Receiving:
     """Class Representing a Players Receiving Stats for a Statstical Season"""
-    def __init__(self,dictionary):
-        self.targets = dictionary["targets"]
-        self.rec = dictionary["rec"]
-        self.rec_yds = dictionary["rec_yds"]
-        self.rec_yds_per_rec = dictionary["rec_yds_per_rec"]
-        self.rec_td = dictionary["rec_td"]
-        self.rec_first_down = dictionary["rec_first_down"]
-        self.rec_long = dictionary["rec_long"]
-        self.rec_per_g = dictionary["rec_per_g"]
-        self.rec_yds_per_g = dictionary["rec_yds_per_g"]
-        self.catch_pct = dictionary["catch_pct"]
-        self.rec_yds_per_tgt = dictionary["rec_yds_per_tgt"]
+    def __init__(self,dic):
+        self.targets = dic["targets"] if "targets"in dic else [0]
+        self.rec = dic["rec"] if "rec"in dic else [0]
+        self.rec_yds = dic["rec_yds"] if "rec_yds"in dic else [0]
+        self.rec_yds_per_rec = dic["rec_yds_per_rec"] if "rec_yds_per_rec"in dic else [0]
+        self.rec_td = dic["rec_td"] if "rec_td"in dic else [0]
+        self.rec_first_down = dic["rec_first_down"] if "rec_first_down"in dic else [0]
+        self.rec_long = dic["rec_long"] if "rec_long"in dic else [0]
+        self.rec_per_g = dic["rec_per_g"] if "rec_per_g"in dic else [0]
+        self.rec_yds_per_g = dic["rec_yds_per_g"] if "rec_yds_per_g"in dic else [0]
+        self.catch_pct = dic["catch_pct"] if "catch_pct"in dic else [0]
+        self.rec_yds_per_tgt = dic["rec_yds_per_tgt"] if "rec_yds_per_tgt"in dic else [0]
 class Passing:
     """Class Representing a Players Passing Stats for a Statstical Season"""
-    def __init__(self,dictionary):
-        self.pass_cmp = dictionary["pass_cmp"]
-        self.pass_att = dictionary["pass_att"]
-        self.qb_rec = dictionary["qb_rec"]
-        self.pass_cmp_pct = dictionary["pass_cmp_pct"]
-        self.pass_yds = dictionary["pass_yds"]
-        self.pass_td = dictionary["pass_td"]
-        self.pass_td_pct = dictionary["pass_td_pct"]
-        self.pass_int = dictionary["pass_int"]
-        self.pass_int_pct = dictionary["pass_int_pct"]
-        self.pass_first_down = dictionary["pass_first_down"]
-        self.pass_long = dictionary["pass_long"]
-        self.pass_yds_per_att = dictionary["pass_yds_per_att"]
-        self.pass_adj_yds_per_att = dictionary["pass_adj_yds_per_att"]
-        self.pass_yds_per_cmp = dictionary["pass_yds_per_cmp"]
-        self.pass_yds_per_g = dictionary["pass_yds_per_g"]
-        self.pass_rating = dictionary["pass_rating"]
-        self.pass_sacked = dictionary["pass_sacked"]
-        self.pass_sacked_yds = dictionary["pass_sacked_yds"]
-        self.pass_sacked_pct = dictionary["pass_sacked_pct"]
-        self.pass_net_yds_per_att = dictionary["pass_net_yds_per_att"]
-        self.pass_adj_net_yds_per_att = dictionary["pass_adj_net_yds_per_att"]
+    def __init__(self,dic):
+        self.pass_cmp = dic["pass_cmp"] if "pass_cmp"in dic else [0]
+        self.pass_att = dic["pass_att"] if "pass_att"in dic else [0]
+        self.qb_rec = dic["qb_rec"] if "qb_rec"in dic else [0]
+        self.pass_cmp_pct = dic["pass_cmp_pct"] if "pass_cmp_pct"in dic else [0]
+        self.pass_yds = dic["pass_yds"] if "pass_yds"in dic else [0]
+        self.pass_td = dic["pass_td"] if "pass_td"in dic else [0]
+        self.pass_td_pct = dic["pass_td_pct"] if "pass_td_pct"in dic else [0]
+        self.pass_int = dic["pass_int"] if "pass_int"in dic else [0]
+        self.pass_int_pct = dic["pass_int_pct"] if "pass_int_pct"in dic else [0]
+        self.pass_first_down = dic["pass_first_down"] if "pass_first_down"in dic else [0]
+        self.pass_long = dic["pass_long"] if "pass_long"in dic else [0]
+        self.pass_yds_per_att = dic["pass_yds_per_att"] if "pass_yds_per_att"in dic else [0]
+        self.pass_adj_yds_per_att = dic["pass_adj_yds_per_att"] if "pass_adj_yds_per_att"in dic else [0]
+        self.pass_yds_per_cmp = dic["pass_yds_per_cmp"] if "pass_yds_per_cmp"in dic else [0]
+        self.pass_yds_per_g = dic["pass_yds_per_g"] if "pass_yds_per_g"in dic else [0]
+        self.pass_rating = dic["pass_rating"] if "pass_rating"in dic else [0]
+        self.pass_sacked = dic["pass_sacked"] if "pass_sacked"in dic else [0]
+        self.pass_sacked_yds = dic["pass_sacked_yds"] if "pass_sacked_yds"in dic else [0]
+        self.pass_sacked_pct = dic["pass_sacked_pct"] if "pass_sacked_pct"in dic else [0]
+        self.pass_net_yds_per_att = dic["pass_net_yds_per_att"] if "pass_net_yds_per_att"in dic else [0]
+        self.pass_adj_net_yds_per_att = dic["pass_adj_net_yds_per_att"] if "pass_adj_net_yds_per_att"in dic else [0]
 class Season:
     """Class Representing a single Statstical Season"""
     def __init__(self, year):
@@ -155,7 +163,7 @@ def get_player(row):
     player_id = ""
     player_name = ""
     position = ""
-    for cell in row.findAll('td'): 
+    for cell in row.findAll('td'):
         if cell.attrs["data-stat"] == "name_display":
             player_id = cell.attrs["data-append-csv"]
             player_name = cell.text
@@ -170,13 +178,14 @@ def get_player(row):
         # print("{0} already exists in Players Array".format(playerName))
         return player
     player = Player(player_name,player_id,position,{})
-    if player.pos in POS_FILTER or POS_FILTER is None:
+    if player.pos in POS_FILTER or len(POS_FILTER) == 0:
         players_array.setdefault(player_id,player)
     return player
 def _sum(arr):
     sum_var = 0
     for i in arr:
-        sum_var = sum_var + int(i)
+        arg = int(i) if i != '' else 0
+        sum_var = sum_var + arg
     return sum_var
 def stat_sum(dictionary,stat):
     """Returns the sum of all values in a stat array"""
@@ -249,19 +258,63 @@ def calculate_qb_rating(dictionary):
     yds = stat_sum(dictionary,"pass_yds")
     td = stat_sum(dictionary,"pass_td")
     interceptions = stat_sum(dictionary,"pass_int")
-    if att < 10:
-        return 0
-    e = (cmp/att - 0.3) * 5
-    f = (yds/att - 3) * 0.25
-    g = (td/att) * 20
-    h = 2.375 - (interceptions/att * 25)
-
-    a = 0 if e <0 else e if e <2.375 else 2.375
-    b = 0 if f <0 else f if f <2.375 else 2.375
-    c = 0 if g <0 else g if g <2.375 else 2.375
-    d = 0 if h <0 else h if h <2.375 else 2.375
-    rate = ((a + b + c + d)/6) * 100
-    return rate
+    if att != 0:
+        rate = handle_nfl_passer_rating(att,cmp,yds,td,interceptions)
+        return rate
+    return 0
+def handle_nfl_passer_rating(att,cmpls, yds, tds, ints):
+    """Defines a function which handles passer rating calculation for the NFL."""
+    def _min_max(x, xmin, xmax):
+        """
+        Defines a function which enforces a minimum and maximum value.
+        Input: x, the value to check.
+        Input: xmin, the minumum value.
+        Input: xmax, the maximum value.
+        Output: Either x, xmin or xmax, depending.
+        """
+        # Check if x is less than the minimum. If so, return the minimum.
+        if x < xmin:
+            return xmin
+        # Check if x is greater than the maximum. If so, return the maximum.
+        elif x > xmax:
+            return xmax
+        # Otherwise, just return x. And weep for the future.
+        else:
+            return x        
+    # Step 0: Make sure these are floats, dammit.
+    att = att + 0.0
+    cmpls = cmpls + 0.0
+    yds = yds + 0.0
+    tds = tds + 0.0
+    ints = ints + 0.0
+    # Step 1: The completion percentage.
+    step_1 = cmpls/att
+    step_1 = step_1 - 0.3
+    step_1 = step_1 * 5
+    step_1 = _min_max(step_1, 0, 2.375)
+    # Step 2: The yards per attempt.
+    step_2 = yds/att
+    step_2 = step_2 - 3
+    step_2 = step_2 * 0.25
+    step_2 = _min_max(step_2, 0, 2.375)
+    # Step 3: Touchdown percentage.
+    step_3 = tds/att
+    step_3 = step_3 * 20
+    step_3 = _min_max(step_3, 0, 2.375)
+    
+    # Step 4: Interception percentage.
+    step_4 = ints/att
+    step_4 = step_4 * 25
+    step_4 = 2.375 - step_4
+    step_4 = _min_max(step_4, 0, 2.375)
+    
+    # Step 5: Compute the rating based on the sum of steps 1-4.
+    rating = step_1 + step_2 + step_3 + step_4 + 0.0
+    rating = rating / 6
+    rating = rating * 100
+    
+    # Step 6: Return the rating, formatted to 1 decimal place, as a Decimal.
+    return rating
 def get_headers(table,dictionary):
     """retrieves the headers of the table"""
     for row in table.thead.find_all('tr'):
@@ -324,15 +377,27 @@ def get_stats(year):
     for key,sort in to_fetch.items():
         base_url = "https://www.pro-football-reference.com"
         url = f"{base_url}/years/{year}/{key}.htm#{key}::{sort}"
-        check_limit()
-        data = soup(requests.get(url,timeout=10).text, 'html.parser')
+        # check_limit()
+        table_file = Path(f"Tables/{year}/{key}.txt")
+        if not os.path.exists(Path(f"Tables/{year}")):
+            os.makedirs(Path(f"Tables/{year}"))
+        if table_file.is_file() and year != CURRENT_SEASON:
+            with open(table_file,encoding="utf-8") as file:
+                text_data = file.read()
+                file.close()
+        else:
+            text_data = html_request(url)
+            with open(table_file,"w",encoding="utf-8") as file:
+                file.write(text_data)
+                file.close()
+        data = soup(text_data, 'html.parser')
         table = data.find('table', id=key)
         table_dict.setdefault(key,table)
         for row in table.tbody.find_all('tr'):
             dictionary = {}
             get_headers(table,dictionary)
             fetched_player = get_player(row)
-            if fetched_player.pos not in POS_FILTER and POS_FILTER is not None:
+            if fetched_player.pos not in POS_FILTER and len(POS_FILTER) > 0:
                 continue
             new_stat = get_table_row(row,dictionary)
             if str(year) in fetched_player.stats:
@@ -366,18 +431,19 @@ def leader_stats(start_season,end_season):
     for season in x:
         print(f"Starting Season {season}")
         get_season_stats(season)
-        if end_season - start_season >= 8 and season != end_season:
-            time.sleep(8)
+        # if end_season - start_season >= 8 and season != end_season:
+        #     time.sleep(8)
     for player in players_array.values():
-        list_player = get_totals(player,final_dictionary)
+        list_player = get_totals(player,)
         final_list.append(list_player)
 
         for key in x:
-            s_dictionary.setdefault(str(key),[])
-            season_list_item = get_season_dictionary(player,str(key))
+            season_key = str(key)
+            s_dictionary.setdefault(season_key,[])
+            season_list_item = get_season_dictionary(player,season_key)
             if season_list_item is None:
                 continue
-            s_dictionary.setdefault(str(key),[]).append(season_list_item)
+            s_dictionary.setdefault(season_key,[]).append(season_list_item)
     for seasons,values in s_dictionary.items():
         season_dictionary.setdefault(seasons,{})
         sorted_list = sorted(values, key=itemgetter(stats_ref[SORT_STAT]["title"]), reverse=True)
@@ -418,14 +484,14 @@ def format_excel_column(book,sheet,column):
 def save_to_excel(start_season,end_season,dataframes):
     """Takes a dictionary of dataframes and saves them to a single excel sheet"""
     output_path = Path("/Users/avatara/Desktop/SportsScraping/Output")
-    if POS_FILTER is None:
+    if len(POS_FILTER) == 0:
         file_path = output_path.joinpath(f'{start_season} to {end_season}.xlsx')
     else:
         if len(POS_FILTER) > 3:
-            file_path = output_path.joinpath(f'multiple |{start_season} to {end_season}.xlsx')
-        else:    
+            file_path = output_path.joinpath(f'multiple | {start_season} to {end_season}.xlsx')
+        else:
             pos_str = " ".join(POS_FILTER)
-            file_path = output_path.joinpath(f'{pos_str} |{start_season} to {end_season}.xlsx')
+            file_path = output_path.joinpath(f'{pos_str} | {start_season} to {end_season}.xlsx')
     with pd.ExcelWriter(file_path) as writer:
         workbook = writer.book
         column_ref = load_json("Utils/ColumnRef.json")
@@ -435,7 +501,7 @@ def save_to_excel(start_season,end_season,dataframes):
             worksheet.freeze_panes(2, 2)    # Freeze the first row.
             for item in column_ref.values():
                 format_excel_column(workbook,worksheet,item)
-def get_totals(player,dictionary):
+def get_totals(player):
     """gets totals for the player"""
     player_dict = {}
     # print(f"Getting Totals for {player.name}")
@@ -447,7 +513,7 @@ def get_totals(player,dictionary):
     for stats in player.totals:
         player_dict.setdefault(stats,player.totals[stats])
         # dictionary.setdefault(stats,[]).append(player.totals[stats])
-    return player_dict    
+    return player_dict
 def get_season_dictionary(player,year):
     """gets the season dictionary"""
 
@@ -466,26 +532,6 @@ def run_program(start_season,end_season):
     dataframes = leader_stats(start_season,end_season)
     save_to_excel(start_season,end_season,dataframes)
 
-
-            # worksheet.set_column_pixels(0, 0, 30, standard)
-            # worksheet.set_column_pixels(1, 1, 175, standard)
-            # worksheet.set_column_pixels(2, 3, 45, standard)
-            # worksheet.set_column_pixels(4, 4, 45, rightborder)
-            # worksheet.set_column_pixels(5, 6, 60, standard)
-            # worksheet.set_column_pixels(7, 7, 60, percent)
-            # worksheet.set_column_pixels(8, 9, 60, standard)
-            # worksheet.set_column_pixels(10, 10, 60, percent)
-            # worksheet.set_column_pixels(11, 11, 60, standard)
-            # worksheet.set_column_pixels(12, 12, 60, percent)
-            # worksheet.set_column_pixels(13, 21, 60, standard)
-            # worksheet.set_column_pixels(22, 22, 60, percent)
-            # worksheet.set_column_pixels(23, 23, 60, standard)
-            # worksheet.set_column_pixels(24, 24, 60, rightborder)
-            # worksheet.set_column_pixels(25, 31, 60, standard)
-            # worksheet.set_column_pixels(32, 33, 60, rightborder)
-            # worksheet.set_column_pixels(34, 42, 60, standard)
-            # worksheet.set_column_pixels(43, 43, 60, percent)
-            # worksheet.set_column_pixels(44, 44, 60, standard)
     print("done")
 
 # def Test():
