@@ -17,7 +17,7 @@ MIN_PYTHON = (3, 10)
 
 
 CURRENT_SEASON = 2024
-START_SEASON = 1966
+START_SEASON = 2023
 END_SEASON = 2024
 POS_FILTER = {}
 SORT_STAT = "pass_att"
@@ -164,7 +164,7 @@ def get_player(row):
     player_name = ""
     position = ""
     for cell in row.findAll('td'):
-        if cell.attrs["data-stat"] == "name_display":
+        if cell.attrs["data-stat"] == "name_display" and cell.text != 'League Average' :
             player_id = cell.attrs["data-append-csv"]
             player_name = cell.text
         elif cell.attrs["data-stat"] == "pos":
